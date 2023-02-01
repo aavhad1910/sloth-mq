@@ -1,0 +1,128 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-app
+  labels:
+    app: web-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: web-app
+  template:
+    metadata:
+      labels:
+        app: web-app
+    spec:
+      volumes:
+        - name: slothmq-storage
+          persistentVolumeClaim:
+            claimName: azurevolume
+      containers:
+        - name: web-app
+          image: slothmq.azurecr.io/slothmq/platform
+          command: ['gunicorn', 'wsgi:app', '--bind', '0.0.0.0:3000', '--workers', '20']
+          ports:
+            - containerPort: 3000
+              name: web-app
+          volumeMounts:
+            - mountPath: "/code/shared_volume"
+              name: slothmq-storage
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-app-cleanup
+  labels:
+    app: web-app-cleanup
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web-app-cleanup
+  template:
+    metadata:
+      labels:
+        app: web-app-cleanup
+    spec:
+      volumes:
+        - name: slothmq-storage
+          persistentVolumeClaim:
+            claimName: azurevolume
+      containers:
+        - name: web-app-cleanup
+          image: slothmq.azurecr.io/slothmq/platform
+          command: ['flask', 'run', '--port', '3000', '--host', '0.0.0.0', '--without-threads']
+          env:
+            - name: FLASK_APP
+              value: "/code/cleanup_worker.py"
+            - name: FLASK_ENV
+              value: "development"
+          ports:
+            - containerPort: 3000
+              name: web-app-cleanup
+          volumeMounts:
+            - mountPath: "/code/shared_volume"
+              name: slothmq-storage
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-resource-group: slothmq
+  name: web-cleanup-lb
+spec:
+  loadBalancerIP: 20.85.209.221
+  type: LoadBalancer
+  selector:
+    app: web-app-cleanup
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cleanup-scheduler
+  labels:
+    app: cleanup-scheduler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cleanup-scheduler
+  template:
+    metadata:
+      labels:
+        app: cleanup-scheduler
+    spec:
+      volumes:
+        - name: slothmq-storage
+          persistentVolumeClaim:
+            claimName: azurevolume
+      containers:
+        - name: cleanup-scheduler
+          image: slothmq.azurecr.io/slothmq/platform
+          command: ['python3', '/code/cleanup_scheduler.py']
+          volumeMounts:
+            - mountPath: "/code/shared_volume"
+              name: slothmq-storage
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-resource-group: slothmq
+  name: web-lb
+spec:
+  loadBalancerIP: 20.85.209.0
+  type: LoadBalancer
+  selector:
+    app: web-app
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+---

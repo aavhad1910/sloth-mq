@@ -1,0 +1,24 @@
+version: '2'
+services:
+    web:
+        image: platform
+        container_name: web
+        ports:
+            - "3000:3000"
+        volumes:
+            - .:/code
+            - /Users/sriablaze/Desktop/slothmq_volumes/shared_volume:/code/shared_volume
+        depends_on:
+            - redis
+        environment:
+            - FLASK_APP=/code/server.py
+            - FLASK_ENV=development
+
+        command: ['flask', 'run', '--port', '3000', '--host', '0.0.0.0', '--without-threads']
+    
+    redis:
+        image: bitnami/redis
+        volumes:
+          - /Users/sriablaze/Desktop/slothmq_volumes/redis_persistence:/bitnami/redis/data
+        environment:
+          - ALLOW_EMPTY_PASSWORD=yes

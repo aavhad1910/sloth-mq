@@ -1,0 +1,83 @@
+kubectl apply -f k8_config.yaml
+
+kubectl scale deployment web-app-cleanup --replicas=0
+kubectl scale deployment cleanup-scheduler --replicas=0
+
+
+az network public-ip create \
+    --resource-group slothmq \
+    --name slothmq_pub_ip \
+    --sku Standard \
+    --allocation-method static
+
+az network public-ip create \
+    --resource-group slothmq \
+    --name slothmq_pub_ip_cleanup \
+    --sku Standard \
+    --allocation-method static
+
+{
+  "publicIp": {
+    "ddosSettings": {
+      "protectionMode": "VirtualNetworkInherited"
+    },
+    "etag": "W/\"c22044aa-bf8a-48f3-a20d-c3c7776733db\"",
+    "id": "/subscriptions/97741321-4173-4a7b-aeb7-fb4b68de2db3/resourceGroups/slothmq/providers/Microsoft.Network/publicIPAddresses/slothmq_pub_ip",
+    "idleTimeoutInMinutes": 4,
+    "ipAddress": "20.85.209.0",
+    "ipTags": [],
+    "location": "eastus",
+    "name": "slothmq_pub_ip",
+    "provisioningState": "Succeeded",
+    "publicIPAddressVersion": "IPv4",
+    "publicIPAllocationMethod": "Static",
+    "resourceGroup": "slothmq",
+    "resourceGuid": "5d5de8f9-0206-489c-a6ac-9dfba48172c6",
+    "sku": {
+      "name": "Standard",
+      "tier": "Regional"
+    },
+    "type": "Microsoft.Network/publicIPAddresses"
+  }
+}
+
+{
+  "publicIp": {
+    "ddosSettings": {
+      "protectionMode": "VirtualNetworkInherited"
+    },
+    "etag": "W/\"78c354d9-2f4e-44be-a1ab-2a1dc90eed48\"",
+    "id": "/subscriptions/97741321-4173-4a7b-aeb7-fb4b68de2db3/resourceGroups/slothmq/providers/Microsoft.Network/publicIPAddresses/slothmq_pub_ip_cleanup",
+    "idleTimeoutInMinutes": 4,
+    "ipAddress": "20.85.209.221",
+    "ipTags": [],
+    "location": "eastus",
+    "name": "slothmq_pub_ip_cleanup",
+    "provisioningState": "Succeeded",
+    "publicIPAddressVersion": "IPv4",
+    "publicIPAllocationMethod": "Static",
+    "resourceGroup": "slothmq",
+    "resourceGuid": "61f89b7c-0d93-4ca0-bbf3-a07e114736c4",
+    "sku": {
+      "name": "Standard",
+      "tier": "Regional"
+    },
+    "type": "Microsoft.Network/publicIPAddresses"
+  }
+}
+export MSYS_NO_PATHCONV=1
+az role assignment create --assignee c2103ea2-81f8-4972-884b-1bf793d9f6f5 --role "Network Contributor" --scope /subscriptions/97741321-4173-4a7b-aeb7-fb4b68de2db3/resourceGroups/slothmq
+{
+  "canDelegate": null,
+  "condition": null,
+  "conditionVersion": null,
+  "description": null,
+  "id": "/subscriptions/97741321-4173-4a7b-aeb7-fb4b68de2db3/resourceGroups/slothmq/providers/Microsoft.Authorization/roleAssignments/15dab91d-21fe-4db1-9223-ccb584d798ce",
+  "name": "15dab91d-21fe-4db1-9223-ccb584d798ce",
+  "principalId": "c2103ea2-81f8-4972-884b-1bf793d9f6f5",
+  "principalType": "ServicePrincipal",
+  "resourceGroup": "slothmq",
+  "roleDefinitionId": "/subscriptions/97741321-4173-4a7b-aeb7-fb4b68de2db3/providers/Microsoft.Authorization/roleDefinitions/4d97b98b-1d4f-4787-a291-c67834d212e7",
+  "scope": "/subscriptions/97741321-4173-4a7b-aeb7-fb4b68de2db3/resourceGroups/slothmq",
+  "type": "Microsoft.Authorization/roleAssignments"
+}

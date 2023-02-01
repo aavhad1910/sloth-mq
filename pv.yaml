@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: azurevolume
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: azurevolume-csi
+  csi:
+    driver: file.csi.azure.com
+    readOnly: false
+    volumeHandle: slothmq  # make sure this volumeid is unique in the cluster
+    volumeAttributes:
+      resourceGroup: slothmq
+      shareName: slothmq
+    nodeStageSecretRef:
+      name: azure-secret
+      namespace: default
+  mountOptions:
+    - dir_mode=0777
+    - file_mode=0777
+    - uid=0
+    - gid=0
+    - mfsymlinks
+    - cache=strict
+    - nosharesock
+    - nobrl

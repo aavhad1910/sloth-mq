@@ -1,0 +1,43 @@
+
+
+
+Publish
+Hi -> uuid 123
+Store in file system {"data": "Hi", "id": 123}
+
+Loop parallel implementation
+Hashmap: {"123": msi}
+
+Primary Queue "123"
+Sorted Set "123", TIME
+
+123 -> W1
+123 to Sorted Set
+timeout occurs
+123 -> W2 consumes
+W1 Acknowledges
+
+Atleast Once Semantics
+
+Efficient Implementation for SortedSet Processing
+
+Sorted Set Ascending order of timestamps
+Process until I see an element greater than the threshold
+Use TIME service from redis for background processing the sorted set
+
+
+msi both in hashmap and the primary queue
+
+After popping, we add a timestamp to the message_id in the hashmap
+
+When do we put it 
+
+Background process: That goes over messages and
+
+ MSI {1, 5, 123, a.txt}
+ Primary Queue (Index)
+
+
+Ack
+
+ Queue MSI
